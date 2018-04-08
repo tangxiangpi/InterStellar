@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.qiyi.video.mcg.arch" >
+
+    <application>
+
+
+        <provider
+            android:authorities="org.qiyi.video.mcg.arch.dispatch"
+            android:exported="false"
+            android:name=".dispatch.DispatcherProvider"/>
+
+    </application>
+
+</manifest>
