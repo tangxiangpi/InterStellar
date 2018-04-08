@@ -103,11 +103,7 @@ public class StellarMethod implements Parcelable, Outable {
         for(int i=0;i<length;i++){
             parameters[i]=in.readParcelable(getClass().getClassLoader()); //TODO 目前OutParameter在这里会出错
         }
-        //TODO 难道一定要使用createTypedArray()才行?
-        //Parcelable[]parcelables=in.readParcelableArray(getClass().getClassLoader());
         Logger.d("StellarMethod-->StellarMethod(Parcel),readParcelableArray");
-        //this.parameters=(AbstractParameter[])in.createTypedArray()
-        //this.parameters = (AbstractParameter[]) in.readParcelableArray(getClass().getClassLoader());
     }
 
     //TODO writeArgsToParcel(..)和dest.writeParcelableArray(..)有什么区别呢？本质上是一样的吗？
@@ -119,24 +115,15 @@ public class StellarMethod implements Parcelable, Outable {
         }else{
             dest.writeInt(parameters.length);
             for(int i=0;i<parameters.length;i++){
-                dest.writeParcelable(parameters[i],flags);
+                //dest.writeParcelable(parameters[i],flags);
                 //KP writeToParcel和直接dest.writeParcelable(..)的区别在于，前者会让我们自己定义的OutParameter根据flags来决定是写入值还是只写入类型
-                //parameters[i].writeToParcel(dest,flags);
+                if(flags==PARCELABLE_WRITE_RETURN_VALUE){
+                    parameters[i].writeToParcel(dest,flags);
+                }else{
+                    dest.writeParcelable(parameters[i],flags);
+                }
             }
         }
-
-        //dest.writeInt(isOneWay ? 1 : 0);
-        //TODO 是不是不用搞这么复杂呢？
-        //dest.writeTypedArray(parameters,flags);
-        /*
-        if (flags == PARCELABLE_WRITE_RETURN_VALUE) {
-            writeArgsToParcel(dest, flags);
-        } else {
-            Logger.d("StellarMethod-->writeParcelableArray directly"); //TODO 打log发现执行到这里
-            dest.writeTypedArray(parameters,flags);
-            //dest.writeParcelableArray(parameters, flags);
-        }
-        */
     }
 
     @Override
@@ -152,9 +139,8 @@ public class StellarMethod implements Parcelable, Outable {
             return;
         }
         for (int i = 0; i < N; i++) {
-
-            parameters[i]=in.readParcelable(loader);
-
+            //parameters[i]=in.readParcelable(loader);
+            parameters[i].readFromParcel(in);
 
             /*
             if (parameters[i] instanceof Outable) {
@@ -164,9 +150,10 @@ public class StellarMethod implements Parcelable, Outable {
                 Outable para = (Outable) parameters[i];
                 para.readFromParcel(in);
                 Logger.d("StellarMethod-->readFromParcel4Parameters,parameters["+i+"]:"+parameters[i].toString());
+            }else{
+                parameters[i]=in.readParcelable(loader);
             }
             */
-
         }
     }
 

@@ -13,6 +13,7 @@ import android.util.SizeF;
 import android.util.SparseArray;
 
 import org.qiyi.video.mcg.arch.exception.StellarException;
+import org.qiyi.video.mcg.arch.parcelable.Outable;
 import org.qiyi.video.mcg.arch.type.BaseType;
 import org.qiyi.video.mcg.arch.type.Type;
 
@@ -27,40 +28,39 @@ import java.util.Map;
  * Created by wangallen on 2018/4/3.
  */
 //TODO 更好的一种方式是不是让它实现in和out的所有功能，然后在InParameter和OutParameter中再重写相应的方法
-public abstract class AbstractParameter implements Parcelable {
+public abstract class AbstractParameter implements Parcelable,Outable{
 
     // Keep in sync with frameworks/native/include/private/binder/ParcelValTypes.h.
-    private static final int VAL_NULL = -1;
-    private static final int VAL_STRING = 0;
-    private static final int VAL_INTEGER = 1;
-    private static final int VAL_MAP = 2;
-    private static final int VAL_BUNDLE = 3;
-    private static final int VAL_PARCELABLE = 4;
-    private static final int VAL_SHORT = 5;
-    private static final int VAL_LONG = 6;
-    private static final int VAL_FLOAT = 7;
-    private static final int VAL_DOUBLE = 8;
-    private static final int VAL_BOOLEAN = 9;
-    private static final int VAL_CHARSEQUENCE = 10;
-    private static final int VAL_LIST = 11;
-    private static final int VAL_SPARSEARRAY = 12;
-    private static final int VAL_BYTEARRAY = 13;
-    private static final int VAL_STRINGARRAY = 14;
-    private static final int VAL_IBINDER = 15;
-    private static final int VAL_PARCELABLEARRAY = 16;
-    private static final int VAL_OBJECTARRAY = 17;
-    private static final int VAL_INTARRAY = 18;
-    private static final int VAL_LONGARRAY = 19;
-    private static final int VAL_BYTE = 20;
-    private static final int VAL_SERIALIZABLE = 21;
-    private static final int VAL_SPARSEBOOLEANARRAY = 22;
-    private static final int VAL_BOOLEANARRAY = 23;
-    private static final int VAL_CHARSEQUENCEARRAY = 24;
-    private static final int VAL_PERSISTABLEBUNDLE = 25;
-    private static final int VAL_SIZE = 26;
-    private static final int VAL_SIZEF = 27;
-    private static final int VAL_DOUBLEARRAY = 28;
-
+    protected static final int VAL_NULL = -1;
+    protected static final int VAL_STRING = 0;
+    protected static final int VAL_INTEGER = 1;
+    protected static final int VAL_MAP = 2;
+    protected static final int VAL_BUNDLE = 3;
+    protected static final int VAL_PARCELABLE = 4;
+    protected static final int VAL_SHORT = 5;
+    protected static final int VAL_LONG = 6;
+    protected static final int VAL_FLOAT = 7;
+    protected static final int VAL_DOUBLE = 8;
+    protected static final int VAL_BOOLEAN = 9;
+    protected static final int VAL_CHARSEQUENCE = 10;
+    protected static final int VAL_LIST = 11;
+    protected static final int VAL_SPARSEARRAY = 12;
+    protected static final int VAL_BYTEARRAY = 13;
+    protected static final int VAL_STRINGARRAY = 14;
+    protected static final int VAL_IBINDER = 15;
+    protected static final int VAL_PARCELABLEARRAY = 16;
+    protected static final int VAL_OBJECTARRAY = 17;
+    protected static final int VAL_INTARRAY = 18;
+    protected static final int VAL_LONGARRAY = 19;
+    protected static final int VAL_BYTE = 20;
+    protected static final int VAL_SERIALIZABLE = 21;
+    protected static final int VAL_SPARSEBOOLEANARRAY = 22;
+    protected static final int VAL_BOOLEANARRAY = 23;
+    protected static final int VAL_CHARSEQUENCEARRAY = 24;
+    protected static final int VAL_PERSISTABLEBUNDLE = 25;
+    protected static final int VAL_SIZE = 26;
+    protected static final int VAL_SIZEF = 27;
+    protected static final int VAL_DOUBLEARRAY = 28;
 
     protected int type;
     protected int baseType;
@@ -77,6 +77,11 @@ public abstract class AbstractParameter implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public void readFromParcel(Parcel in){
+        //do nothing
     }
 
     //TODO 后面可以考虑扩展到包装类，这样就比AIDL使用上方便更多了

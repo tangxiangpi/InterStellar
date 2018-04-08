@@ -20,16 +20,6 @@ public class InParameter extends AbstractParameter {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         extendWriteValue(dest,value,flags);
-        /*
-        if (flags != PARCELABLE_WRITE_RETURN_VALUE) {
-            //dest.writeInt(type);  //对于InParameter来说，type和baseType都是多余的
-            //dest.writeInt(baseType);
-            //TODO 能否直接用writeValue()和readValue()搞定呢?
-            //TODO 值得尝试一下!
-            //TODO 考虑到parcelableFlags,写一个扩展的writeValue()方法即可!
-            dest.writeValue(value);
-        }
-        */
     }
 
     public static final Creator<InParameter> CREATOR = new Creator<InParameter>() {

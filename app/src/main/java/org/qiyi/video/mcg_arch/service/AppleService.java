@@ -16,6 +16,7 @@ public class AppleService implements IAppleService {
         return appleNum * 5;
     }
 
+    /*
     @Override
     public String getAppleDetails(int appleNum, String manifacture, String tailerName, String userName, int userId) {
         manifacture = "IKEA";
@@ -27,6 +28,7 @@ public class AppleService implements IAppleService {
             return tailerName + "-->" + manifacture;
         }
     }
+    */
 
     @Override
     public String getAppleDesc(Apple apple) {

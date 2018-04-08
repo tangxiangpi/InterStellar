@@ -19,7 +19,7 @@ public interface IAppleService {
     String getAppleDesc(@out Apple apple);
 
     //TODO 像String和int是不能用@out或@inout修饰的，这个其实最好在编译时报错!
-    String getAppleDetails(int appleNum, @out String manifacture, @out String tailerName, String userName, @out int userId);
+    //String getAppleDetails(int appleNum, @out String manifacture, @out String tailerName, String userName, @out int userId);
     //String getAppleDetails(int appleNum, @inout String manifacture, @inout String tailerName, String userName, @inout int userId);
 
 }

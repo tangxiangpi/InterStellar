@@ -2,13 +2,11 @@ package org.qiyi.video.mcg.arch.param;
 
 import android.os.Parcel;
 
-import org.qiyi.video.mcg.arch.parcelable.Outable;
-
 /**
  * Created by wangallen on 2018/4/7.
  */
 
-public class InOutParameter extends AbstractParameter implements Outable {
+public class InOutParameter extends AbstractParameter{
 
     public InOutParameter(Object param, java.lang.reflect.Type genericParaType) {
         this.value = param;
