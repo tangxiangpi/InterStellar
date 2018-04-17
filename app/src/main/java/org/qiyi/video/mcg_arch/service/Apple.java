@@ -25,6 +25,9 @@ public class Apple implements Parcelable, Outable {
         this.from = in.readString();
     }
 
+    //这个构造方法非常关键
+    public Apple(){}
+
     public float getWeight() {
         return weight;
     }
@@ -48,6 +51,7 @@ public class Apple implements Parcelable, Outable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        Logger.d("Apple-->writeToParcel()");
         dest.writeFloat(weight);
         dest.writeString(from);
     }

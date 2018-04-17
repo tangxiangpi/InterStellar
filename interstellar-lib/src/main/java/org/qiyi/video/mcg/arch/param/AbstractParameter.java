@@ -13,11 +13,15 @@ import android.util.SizeF;
 import android.util.SparseArray;
 
 import org.qiyi.video.mcg.arch.exception.StellarException;
+import org.qiyi.video.mcg.arch.log.Logger;
 import org.qiyi.video.mcg.arch.parcelable.Outable;
 import org.qiyi.video.mcg.arch.type.BaseType;
 import org.qiyi.video.mcg.arch.type.Type;
+import org.qiyi.video.mcg.arch.utils.ParcelUtils;
+import org.qiyi.video.mcg.arch.utils.ReflectUtils;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +32,7 @@ import java.util.Map;
  * Created by wangallen on 2018/4/3.
  */
 //TODO 更好的一种方式是不是让它实现in和out的所有功能，然后在InParameter和OutParameter中再重写相应的方法
-public abstract class AbstractParameter implements Parcelable,Outable{
+public abstract class AbstractParameter implements Parcelable, Outable {
 
     // Keep in sync with frameworks/native/include/private/binder/ParcelValTypes.h.
     protected static final int VAL_NULL = -1;
@@ -80,7 +84,7 @@ public abstract class AbstractParameter implements Parcelable,Outable{
     }
 
     @Override
-    public void readFromParcel(Parcel in){
+    public void readFromParcel(Parcel in) {
         //do nothing
     }
 
@@ -238,7 +242,10 @@ public abstract class AbstractParameter implements Parcelable,Outable{
             dest.writeInt(VAL_IBINDER);
         } else if (val instanceof Parcelable[]) {
             dest.writeInt(VAL_PARCELABLEARRAY);
-            dest.writeParcelableArray((Parcelable[]) val, flags);
+            dest.writeInt(((Parcelable[]) val).length);
+            dest.writeString(((Parcelable[]) val).getClass().getComponentType().getName());
+
+            //dest.writeParcelableArray((Parcelable[]) val, flags);
             //dest.writeInt(((Parcelable[]) val).length);
             //writeParcelableCreator(dest, ((Parcelable[]) val)[0]);
         } else if (val instanceof int[]) {
@@ -361,7 +368,6 @@ public abstract class AbstractParameter implements Parcelable,Outable{
                 }
                 return null;
             }
-            //return in.createIntArray();
             case VAL_LONGARRAY: {
                 int length = in.readInt();
                 if (length > 0) {
@@ -370,14 +376,16 @@ public abstract class AbstractParameter implements Parcelable,Outable{
                     return null;
                 }
             }
-            //return in.createLongArray();
             case VAL_BYTE:
                 return (byte) 0;
             case VAL_SERIALIZABLE:
                 return in.readSerializable();
-            case VAL_PARCELABLEARRAY:
-                //TODO 要创建对象
-                return in.readParcelableArray(loader);
+            case VAL_PARCELABLEARRAY: {
+                //TODO 要创建对象,所以自己这样不行，这里还是要特殊处理
+                int N = in.readInt();
+                String componentType = in.readString();
+                return createParcelableArray(componentType, N);
+            }
             case VAL_SPARSEARRAY:
                 return in.readSparseArray(loader);
             case VAL_SPARSEBOOLEANARRAY:
@@ -389,7 +397,6 @@ public abstract class AbstractParameter implements Parcelable,Outable{
                 }
                 return bundle;
             case VAL_PERSISTABLEBUNDLE:
-                //TODO 要做版本适配
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     return in.readPersistableBundle(loader);
                 } else {
@@ -433,6 +440,24 @@ public abstract class AbstractParameter implements Parcelable,Outable{
         }
     }
 
+    private Object createParcelableArray(String componentType, int length) {
+        Logger.d("AbstractParameter-->createParcelableArray,componentType:" + componentType);
+        try {
+            Class clazz = Class.forName(componentType);
+            //KP 用Array.newInstance()创建的数组，数组中各元素为null;
+            return Array.newInstance(clazz, length);
+            /*
+            for(int i=0;i<length;++i){
+                array[i]=in.readParcelable(clazz.getClassLoader());
+            }
+            return array;
+            */
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
     private CharSequence[] createCharSequenceArray(Parcel in) {
         CharSequence[] array = null;
         int length = in.readInt();
@@ -466,6 +491,119 @@ public abstract class AbstractParameter implements Parcelable,Outable{
         Parcelable.Creator<?>creator=in.readPar
     }
     */
+
+    protected final Object extendReadValue(Parcel source, ClassLoader loader) {
+        int type = source.readInt();
+        switch (type) {
+            case VAL_NULL:
+                return null;
+
+            case VAL_STRING:
+                return source.readString();
+
+            case VAL_INTEGER:
+                return source.readInt();
+
+            case VAL_MAP:
+                return source.readHashMap(loader);
+
+            case VAL_PARCELABLE:
+                return source.readParcelable(loader);
+
+            case VAL_SHORT:
+                return (short) source.readInt();
+
+            case VAL_LONG:
+                return source.readLong();
+
+            case VAL_FLOAT:
+                return source.readFloat();
+
+            case VAL_DOUBLE:
+                return source.readDouble();
+
+            case VAL_BOOLEAN:
+                return source.readInt() == 1;
+
+            case VAL_CHARSEQUENCE:
+                return ParcelUtils.readCharSequence(source);
+
+            case VAL_LIST:
+                return source.readArrayList(loader);
+
+            case VAL_BOOLEANARRAY:
+                return source.createBooleanArray();
+
+            case VAL_BYTEARRAY:
+                return source.createByteArray();
+
+            case VAL_STRINGARRAY:
+                return ParcelUtils.readStringArray(source);
+
+            case VAL_CHARSEQUENCEARRAY:
+                return ParcelUtils.readCharSequenceArray(source);
+
+            case VAL_IBINDER:
+                return source.readStrongBinder();
+
+            case VAL_OBJECTARRAY:
+                return source.readArray(loader);
+
+            case VAL_INTARRAY:
+                return source.createIntArray();
+
+            case VAL_LONGARRAY:
+                return source.createLongArray();
+
+            case VAL_BYTE:
+                return source.readByte();
+
+            case VAL_SERIALIZABLE:
+                return ParcelUtils.readSerializable(source, loader);
+
+            case VAL_PARCELABLEARRAY:
+                return ParcelUtils.readParcelableArray(source);
+            //return source.readParcelableArray(loader);
+
+            case VAL_SPARSEARRAY:
+                return source.readSparseArray(loader);
+
+            case VAL_SPARSEBOOLEANARRAY:
+                return source.readSparseBooleanArray();
+
+            case VAL_BUNDLE:
+                return source.readBundle(loader); // loading will be deferred
+
+            case VAL_PERSISTABLEBUNDLE:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    return source.readPersistableBundle(loader);
+                } else {
+                    throw new StellarException("PersistableBundle on os whose version below 21 is not supported!");
+                }
+            case VAL_SIZE:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    return source.readSize();
+                } else {
+                    throw new StellarException("Size on os whose version below 21 is not supported!");
+                }
+
+            case VAL_SIZEF:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    return source.readSizeF();
+                } else {
+                    throw new StellarException("SizeF on os whose version below 21 is not supported!");
+                }
+
+            case VAL_DOUBLEARRAY:
+                return source.createDoubleArray();
+
+            default:
+                int off = source.dataPosition() - 4;
+                throw new RuntimeException(
+                        "Parcel " + this + ": Unmarshalling unknown type code " + type + " at offset " + off);
+        }
+    }
+
 
     /**
      * Flatten a generic object in to a parcel.  The given Object value may
@@ -587,6 +725,8 @@ public abstract class AbstractParameter implements Parcelable,Outable{
             dest.writeStrongBinder((IBinder) v);
         } else if (v instanceof Parcelable[]) {
             dest.writeInt(VAL_PARCELABLEARRAY);
+            //TODO 这样就够了吗?
+            dest.writeString(v.getClass().getComponentType().getName());
             dest.writeParcelableArray((Parcelable[]) v, flags);
         } else if (v instanceof int[]) {
             dest.writeInt(VAL_INTARRAY);
@@ -598,17 +738,16 @@ public abstract class AbstractParameter implements Parcelable,Outable{
             dest.writeInt(VAL_BYTE);
             dest.writeInt((Byte) v);
         } else if (v instanceof Size) {
+            dest.writeInt(VAL_SIZE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                dest.writeInt(VAL_SIZE);
                 dest.writeSize((Size) v);
             } else {
                 //TODO
             }
 
         } else if (v instanceof SizeF) {
-
+            dest.writeInt(VAL_SIZEF);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                dest.writeInt(VAL_SIZEF);
                 dest.writeSizeF((SizeF) v);
             } else {
                 //TODO
@@ -649,7 +788,7 @@ public abstract class AbstractParameter implements Parcelable,Outable{
         }
     }
 
-    private void writeCharSequence(Parcel dest, CharSequence c) {
+    protected void writeCharSequence(Parcel dest, CharSequence c) {
         try {
             Method method = Parcel.class.getMethod("writeCharSequence", CharSequence.class);
             method.invoke(dest, c);
@@ -658,7 +797,7 @@ public abstract class AbstractParameter implements Parcelable,Outable{
         }
     }
 
-    private void writeCharSequenceArray(Parcel dest, CharSequence[] array) {
+    protected void writeCharSequenceArray(Parcel dest, CharSequence[] array) {
         try {
             Method method = Parcel.class.getMethod("writeCharSequenceArray", CharSequence[].class);
             method.invoke(dest, (Object) array);
@@ -668,28 +807,162 @@ public abstract class AbstractParameter implements Parcelable,Outable{
         }
     }
 
+    protected void readValueFromParcel(Parcel in) {
+        ClassLoader loader = getClass().getClassLoader();
+        int type = in.readInt();
+        if (type == VAL_MAP) {
+            in.readMap((Map) value, loader);
+        } else if (type == VAL_BUNDLE) {
+            value = in.readBundle(loader);
+        } else if (type == VAL_PERSISTABLEBUNDLE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                value = in.readPersistableBundle(loader);
+            } else {
+                //TODO
+            }
 
-    protected int getArrayLength() {
-        if (baseType == BaseType.INT) {
-            return ((int[]) value).length;
-        } else if (baseType == BaseType.SHORT) {
-            return ((short[]) value).length;
-        } else if (baseType == BaseType.LONG) {
-            return ((long[]) value).length;
-        } else if (baseType == BaseType.FLOAT) {
-            return ((float[]) value).length;
-        } else if (baseType == BaseType.DOUBLE) {
-            return ((double[]) value).length;
-        } else if (baseType == BaseType.BYTE) {
-            return ((byte[]) value).length;
-        } else if (baseType == BaseType.BOOLEAN) {
-            return ((boolean[]) value).length;
-        } else if (baseType == BaseType.CHAR) {
-            return ((char[]) value).length;
-        } else if (value instanceof Object[]) {
-            return ((Object[]) value).length;
+        } else if (type == VAL_PARCELABLE) {
+            readParcelableFromParcel(in, (Parcelable) value);
+        } else if (type == VAL_LIST) {
+            in.readList((List) value, loader);
+        } else if (type == VAL_SPARSEARRAY) {
+            value = in.readSparseArray(loader);
+        } else if (type == VAL_BOOLEANARRAY) {
+            in.readBooleanArray((boolean[]) value);
+        } else if (type == VAL_BYTEARRAY) {
+            in.readByteArray((byte[]) value);
+        } else if (type == VAL_STRINGARRAY) {
+            in.readStringArray((String[]) value);
+        } else if (type == VAL_CHARSEQUENCEARRAY) {
+            //TODO
+
+        } else if (type == VAL_PARCELABLEARRAY) {
+            readParcelableArrayFromParcel(in, (Parcelable[]) value);
+        } else if (type == VAL_INTARRAY) {
+            in.readIntArray((int[]) value);
+        } else if (type == VAL_LONGARRAY) {
+            in.readLongArray((long[]) value);
+        } else if (type == VAL_DOUBLEARRAY) {
+            in.readDoubleArray((double[]) value);
+        } else {
+            throw new StellarException("type==" + type + " is not supported by InterStellar now!");
         }
-        throw new StellarException(value.getClass().getCanonicalName() + " is not supported by InterStellar!");
+    }
+
+    private void readParcelableArrayFromParcel(Parcel in, Parcelable[] val) {
+        Logger.d("AbstractParameter-->readParcelableArrayFromParcel(),val.length:" + val.length);
+        int N = in.readInt();
+        if (N < 0) {
+            return;
+        }
+        if (N != val.length) {
+            throw new StellarException("bad array length!");
+        }
+        Logger.d("N=" + N);
+        for (int i = 0; i < val.length; ++i) {
+            //考虑到此时val这个Parcelable[]数组中各元素还为null,所以需要先创建对象，然后再调用readParcelableFromParcel
+            val[i] = in.readParcelable(getClass().getClassLoader());
+        }
+    }
+
+    /**
+     * 需要注意value有可能为null
+     *
+     * @param in
+     * @param value
+     */
+    private void readParcelableFromParcel(Parcel in, Parcelable value) {
+        if (value == null) {
+            return;
+        }
+        if (value instanceof Outable) {
+            ((Outable) value).readFromParcel(in);
+            return;
+        }
+        Method readFromParcelMethod = ReflectUtils.getMethod(value.getClass(), "readFromParcel", Parcel.class);
+        if (null == readFromParcelMethod) {
+            throw new StellarException(value.getClass().getCanonicalName() + " should implement Outable cause it's annotated with @out or @inout!");
+        }
+        try {
+            readFromParcelMethod.invoke(value, in);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * 这里后面要做简化，因为其实就Parcelable和Parcelable Array比较特殊，其他的可以直接调用extendWriteValue()完成
+     *
+     * @param dest
+     * @param flags
+     */
+    //TODO 这个方法还可以再精简一下，因为允许使用@out修饰的参数类型没这么多
+    protected void extendWriteValue2Parcel(Parcel dest, int flags) {
+        Logger.d("OutParameter-->extendWriteValue2Parcel()");
+        if (value instanceof Map) {
+            dest.writeInt(VAL_MAP);
+            dest.writeMap((Map) value);
+        } else if (value instanceof Bundle) {
+            dest.writeInt(VAL_BUNDLE);
+            dest.writeBundle((Bundle) value);
+        } else if (value instanceof PersistableBundle) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                dest.writeInt(VAL_PERSISTABLEBUNDLE);
+                dest.writePersistableBundle((PersistableBundle) value);
+            } else {
+                //TODO 是抛出异常还是直接就不处理呢?这个其实让注解处理器在编译时抛出异常最好了
+            }
+        } else if (value instanceof Parcelable) {
+            dest.writeInt(VAL_PARCELABLE);
+            writeParcelable2Parcel(dest, flags);
+        } else if (value instanceof List) {
+            dest.writeInt(VAL_LIST);
+            dest.writeList((List) value);
+        } else if (value instanceof SparseArray) {
+            dest.writeInt(VAL_SPARSEARRAY);
+            dest.writeSparseArray((SparseArray) value);
+        } else if (value instanceof boolean[]) {
+            dest.writeInt(VAL_BOOLEANARRAY);
+            dest.writeBooleanArray((boolean[]) value);
+        } else if (value instanceof byte[]) {
+            dest.writeInt(VAL_BYTEARRAY);
+            dest.writeByteArray((byte[]) value);
+        } else if (value instanceof String[]) {
+            dest.writeInt(VAL_STRINGARRAY);
+            dest.writeStringArray((String[]) value);
+        } else if (value instanceof CharSequence[]) {
+            dest.writeInt(VAL_CHARSEQUENCEARRAY);
+            //TODO
+            writeCharSequenceArray(dest, (CharSequence[]) value);
+        } else if (value instanceof Parcelable[]) {
+            //TODO 这样能行吗?
+            dest.writeInt(VAL_PARCELABLEARRAY);
+            writeParcelableArray2Parcel(dest, flags);
+        } else if (value instanceof int[]) {
+            dest.writeInt(VAL_INTARRAY);
+            dest.writeIntArray((int[]) value);
+        } else if (value instanceof long[]) {
+            dest.writeInt(VAL_LONGARRAY);
+            dest.writeLongArray((long[]) value);
+        } else if (value instanceof double[]) {
+            dest.writeInt(VAL_DOUBLEARRAY);
+            dest.writeDoubleArray((double[]) value);
+        } else {
+            throw new StellarException(value.getClass().getCanonicalName() + " can only be annotated by @in");
+        }
+
+    }
+
+    private void writeParcelableArray2Parcel(Parcel dest, int flags) {
+        dest.writeParcelableArray((Parcelable[]) value, flags);
+    }
+
+    private void writeParcelable2Parcel(Parcel dest, int flags) {
+        if (flags == Parcelable.PARCELABLE_WRITE_RETURN_VALUE) {
+            ((Parcelable) value).writeToParcel(dest, flags);
+        } else {
+            dest.writeParcelable((Parcelable) value, flags);
+        }
     }
 
     public Object getValue() {

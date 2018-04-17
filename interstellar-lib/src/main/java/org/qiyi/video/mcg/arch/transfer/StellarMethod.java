@@ -66,7 +66,6 @@ public class StellarMethod implements Parcelable, Outable {
             } else {
                 parameters[i] = new InOutParameter(args[i], genericParaTypes[i]);
             }
-
             //parameters[i] = new StellarParameter(args[i], paraAnnos[i], genericParaTypes[i]);
         }
     }
@@ -106,7 +105,7 @@ public class StellarMethod implements Parcelable, Outable {
         Logger.d("StellarMethod-->StellarMethod(Parcel),readParcelableArray");
     }
 
-    //TODO writeArgsToParcel(..)和dest.writeParcelableArray(..)有什么区别呢？本质上是一样的吗？
+    //TODO writeArgsToParcel(..)和dest.writeParcelableArray(..)有什么区别呢？本质上是一样的吗？这里有没有更简单一点的做法呢?
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(methodName);

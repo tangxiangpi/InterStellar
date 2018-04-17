@@ -14,12 +14,13 @@ public class InParameter extends AbstractParameter {
     }
 
     public InParameter(Parcel in) {
-        value = in.readValue(getClass().getClassLoader());
+        //value = in.readValue(getClass().getClassLoader());
+        this.value = extendReadValue(in, getClass().getClassLoader());
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        extendWriteValue(dest,value,flags);
+        extendWriteValue(dest, value, flags);
     }
 
     public static final Creator<InParameter> CREATOR = new Creator<InParameter>() {

@@ -16,18 +16,18 @@ public class AppleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apple);
 
-        findViewById(R.id.gotoBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(AppleActivity.this,BananaActivity.class));
-            }
-        });
-
-
         findViewById(R.id.registerBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 InterStellar.registerRemoteService(IAppleService.class,new AppleService());
+            }
+        });
+
+
+        findViewById(R.id.gotoBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(AppleActivity.this,BananaActivity.class));
             }
         });
 

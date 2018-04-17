@@ -1,5 +1,6 @@
 package org.qiyi.video.mcg.arch.transfer;
 
+import android.os.Parcelable;
 import android.os.RemoteException;
 
 import org.qiyi.video.mcg.arch.log.Logger;
@@ -58,7 +59,7 @@ public class Transfer extends ITransfer.Stub {
             }
         }
     }
-
+    //TODO 这样是不行的，对于inout的情况，比如类型为Apple[],但是读取出来为什么是Parcelable[]?那说明InOutParameter一定是哪里还有问题
     private Class[] getParameterTypes(AbstractParameter[] parameters) {
         if (null == parameters || parameters.length < 1) {
             return null;
