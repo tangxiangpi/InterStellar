@@ -19,7 +19,8 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.useServiceBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService = InterStellar.getRemoteService(IAppleService.class);
+
+                IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
                 if (appleService != null) {
                     int appleNum = appleService.getApple(120);
                     Logger.d("appleNum:" + appleNum);
@@ -38,6 +39,7 @@ public class BananaActivity extends AppCompatActivity {
 
                 }
             }
+
         });
 
         findViewById(R.id.outTest1Btn).setOnClickListener(new View.OnClickListener() {
@@ -50,7 +52,7 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.outTest2Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.getRemoteService(IAppleService.class);
+                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
                 if(appleService!=null){
                     int[]intArray=new int[3];
                     String result=appleService.outTest2(intArray);
@@ -65,7 +67,7 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.outTest3Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.getRemoteService(IAppleService.class);
+                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
                 if(appleService!=null){
                     int[]intArray=new int[3];
                     String[]strArray=new String[5];
@@ -79,7 +81,7 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.outTest4Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.getRemoteService(IAppleService.class);
+                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
                 if(appleService!=null){
                    Apple[]apples=new Apple[6];
                    appleService.outTest4(apples);
@@ -91,7 +93,7 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.inoutTest1Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.getRemoteService(IAppleService.class);
+                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
                 if(appleService!=null){
                     Apple apple=new Apple(1.8f,"Jiangxi");
                     appleService.inoutTest1(apple);
@@ -104,7 +106,7 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.inoutTest2Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.getRemoteService(IAppleService.class);
+                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
                 if(appleService!=null){
                     Apple[]apples=new Apple[3];
                     for(int i=0;i<apples.length;++i){

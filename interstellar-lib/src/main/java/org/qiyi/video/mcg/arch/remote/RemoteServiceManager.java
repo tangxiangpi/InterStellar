@@ -55,7 +55,7 @@ public class RemoteServiceManager {
         //TODO 向Dispatcher注册接口和进程信息
         checkServiceRegister();
         //TODO 要采用其他策略来获取了
-        if(null==serviceRegister){
+        if (null == serviceRegister) {
             return;
         }
         if (binderBean == null) {
@@ -91,6 +91,7 @@ public class RemoteServiceManager {
             IOUtils.closeQuietly(cursor);
         }
     }
+
     //TODO 出现java.lang.IllegalArgumentException: interface org.qiyi.video.mcg_arch.service.IAppleService is not visible from class loader
     public synchronized <T> T getServiceProxy(Class<?> serviceInterface) {
         return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
@@ -109,9 +110,18 @@ public class RemoteServiceManager {
 
     private Map<String, BinderBean> remoteTransferCache = new HashMap<>();
 
+    //TODO cache的结果要改一下，要将BinderBean进行缓存
     public synchronized ITransfer getRemoteTransfer(final String serviceCanonicalName) {
+        BinderBean bean = getServerBinderBean(serviceCanonicalName);
+        if (bean == null) {
+            return null;
+        }
+        return ITransfer.Stub.asInterface(bean.getBinder());
+    }
+
+    public synchronized BinderBean getServerBinderBean(final String serviceCanonicalName) {
         if (remoteTransferCache.get(serviceCanonicalName) != null) {
-            return ITransfer.Stub.asInterface(remoteTransferCache.get(serviceCanonicalName).getBinder());
+            return remoteTransferCache.get(serviceCanonicalName);
         }
         checkServiceRegister();
         try {
@@ -124,7 +134,7 @@ public class RemoteServiceManager {
                 }
             }, 0);
             remoteTransferCache.put(serviceCanonicalName, binderBean);
-            return ITransfer.Stub.asInterface(binderBean.getBinder());
+            return binderBean;
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;

@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: org.qiyi.video.mcg.arch.plugin.StarBridgePlugin
+
 
 android {
     compileSdkVersion 26
@@ -16,6 +18,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+dispatcher{
+    process ":banana"
 }
 
 dependencies {

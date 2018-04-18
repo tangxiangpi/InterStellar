@@ -1,0 +1,2 @@
+:banana,org.qiyi.video.mcg.arch.stub.CommuStubService$CommuStubService0
+:apple,org.qiyi.video.mcg.arch.stub.CommuStubService$CommuStubService1

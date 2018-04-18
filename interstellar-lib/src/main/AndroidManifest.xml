@@ -4,10 +4,10 @@
     <application>
 
 
-        <provider
-            android:authorities="org.qiyi.video.mcg.arch.dispatch"
+        <!--provider
+            android:authorities="org.qiyi.video.mcg.arch.dispatcher"
             android:exported="false"
-            android:name=".dispatch.DispatcherProvider"/>
+            android:name=".dispatch.DispatcherProvider"/-->
 
     </application>
 

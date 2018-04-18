@@ -38,6 +38,8 @@ public final class ParcelUtils {
             return null;
         }
         try {
+            //TODO 对于 varargs 调用, 应使用 Object
+            //TODO 对于非 varargs 调用, 应使用 Object[], 这样也可以抑制此警告
             return method.invoke(source, null);
         } catch (Exception ex) {
             ex.printStackTrace();

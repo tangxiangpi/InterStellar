@@ -7,5 +7,4 @@ package org.qiyi.video.mcg.arch.remote;
 public interface IRemoteManager {
 
     <T> T getRemoteService(Class<?> serviceInterface);
-
 }

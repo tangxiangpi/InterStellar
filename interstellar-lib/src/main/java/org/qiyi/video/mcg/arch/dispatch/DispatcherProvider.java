@@ -15,7 +15,7 @@ public class DispatcherProvider extends ContentProvider{
 
     public static final String PROJECTION_MAIN[] = {"main"};
 
-    public static final Uri URI = Uri.parse("content://org.qiyi.video.mcg.arch.dispatch/main");
+    public static final Uri URI = Uri.parse("content://org.qiyi.video.mcg.arch.dispatcher/main");
 
     @Override
     public boolean onCreate() {
