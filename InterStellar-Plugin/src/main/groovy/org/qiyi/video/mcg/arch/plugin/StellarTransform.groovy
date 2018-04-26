@@ -9,7 +9,7 @@ import org.gradle.api.Project
 import org.qiyi.video.mcg.arch.plugin.injector.StubServiceMatchInjector
 import org.qiyi.video.mcg.arch.plugin.service.IServiceGenerator
 
-public class StarBridgeTransform extends Transform {
+public class StellarTransform extends Transform {
 
     private Project project
 
@@ -17,14 +17,14 @@ public class StarBridgeTransform extends Transform {
 
     private IServiceGenerator serviceGenerator
 
-    public StarBridgeTransform(Project project, IServiceGenerator serviceGenerator) {
+    public StellarTransform(Project project, IServiceGenerator serviceGenerator) {
         this.project = project
         this.serviceGenerator = serviceGenerator
     }
 
     @Override
     String getName() {
-        return "StarBridgeTransform"
+        return "StellarTransform"
     }
 
     @Override

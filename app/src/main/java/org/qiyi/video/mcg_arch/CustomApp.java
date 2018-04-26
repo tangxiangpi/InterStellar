@@ -14,7 +14,5 @@ public class CustomApp extends Application{
     public void onCreate() {
         super.onCreate();
         InterStellar.init(this);
-
-
     }
 }

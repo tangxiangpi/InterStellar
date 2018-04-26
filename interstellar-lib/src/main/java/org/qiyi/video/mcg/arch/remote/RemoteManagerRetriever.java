@@ -320,7 +320,6 @@ public class RemoteManagerRetriever implements IRemoteManagerRetriever, Handler.
         tempViewToSupportFragment.clear();
         findAllSupportFragmentsWithViews(activity.getSupportFragmentManager().getFragments(), tempViewToSupportFragment);
         Fragment result = null;
-        //TODO 这里会有兼容性问题吗?
         View activityRoot = activity.findViewById(android.R.id.content);
         View current = target;
         while (!current.equals(activityRoot)) {

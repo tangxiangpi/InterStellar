@@ -1,6 +1,5 @@
 package org.qiyi.video.mcg.arch.transfer;
 
-import android.os.Parcelable;
 import android.os.RemoteException;
 
 import org.qiyi.video.mcg.arch.log.Logger;
@@ -35,7 +34,7 @@ public class Transfer extends ITransfer.Stub {
 
     @Override
     public Reply invoke(String serviceInterface, StellarMethod method) throws RemoteException {
-        Logger.d("Transfer-->invoke,serviceInterface:" + serviceInterface + ",method name:" + method.getMethodName()+",process:"+ ProcessUtils.getProcessName(android.os.Process.myPid()));
+        Logger.d("Transfer-->invoke,serviceInterface:" + serviceInterface + ",method name:" + method.getMethodName() + ",process:" + ProcessUtils.getProcessName(android.os.Process.myPid()));
         //TODO 这样直接调用RemoteServiceManager是不是不太好？要不要改一下架构，让Transfer处于上层呢?
         Object serivceImpl = RemoteServiceManager.getInstance().getStubService(serviceInterface);
         if (null == serivceImpl) {
@@ -51,7 +50,6 @@ public class Transfer extends ITransfer.Stub {
             try {
                 Object result = targetMethod.invoke(serivceImpl, getParameters(method.getParameters()));
                 Logger.d("Transfer-->invoke succeed!");
-                //TODO 只是这样还不够，因为还没有处理in,out等! 所以Stub和Proxy需要自己写
                 return new Reply(Reply.SUCCEED, null, result);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -59,7 +57,7 @@ public class Transfer extends ITransfer.Stub {
             }
         }
     }
-    //TODO 这样是不行的，对于inout的情况，比如类型为Apple[],但是读取出来为什么是Parcelable[]?那说明InOutParameter一定是哪里还有问题
+
     private Class[] getParameterTypes(AbstractParameter[] parameters) {
         if (null == parameters || parameters.length < 1) {
             return null;
@@ -74,36 +72,37 @@ public class Transfer extends ITransfer.Stub {
 
     /**
      * 将包装类还原
+     *
      * @param wrapperClazz
      * @return
      */
-    private Class stripWrapper(Class<?>wrapperClazz){
+    private Class stripWrapper(Class<?> wrapperClazz) {
         //如果已经是原始类型，就不用还原了
-        if(wrapperClazz.isPrimitive()){
+        if (wrapperClazz.isPrimitive()) {
             return wrapperClazz;
         }
-        if(wrapperClazz==Integer.class){
+        if (wrapperClazz == Integer.class) {
             return int.class;
         }
-        if(wrapperClazz==Short.class){
+        if (wrapperClazz == Short.class) {
             return short.class;
         }
-        if(wrapperClazz==Long.class){
+        if (wrapperClazz == Long.class) {
             return long.class;
         }
-        if(wrapperClazz==Float.class){
+        if (wrapperClazz == Float.class) {
             return float.class;
         }
-        if(wrapperClazz==Double.class){
+        if (wrapperClazz == Double.class) {
             return double.class;
         }
-        if(wrapperClazz==Boolean.class){
+        if (wrapperClazz == Boolean.class) {
             return boolean.class;
         }
-        if(wrapperClazz==Byte.class){
+        if (wrapperClazz == Byte.class) {
             return byte.class;
         }
-        if(wrapperClazz==Character.class){
+        if (wrapperClazz == Character.class) {
             return char.class;
         }
         return wrapperClazz;

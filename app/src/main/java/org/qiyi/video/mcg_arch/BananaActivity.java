@@ -27,19 +27,25 @@ public class BananaActivity extends AppCompatActivity {
                     float calories = appleService.getAppleCalories(30);
                     Logger.d("calories:" + calories);
 
-                   // String manifacture = "manifacture", tailer = "tailer";
-                    //String detail = appleService.getAppleDetails(10, manifacture, tailer, "Tom", 1000);
-                    //Logger.d("manifacture:"+manifacture+",tailer:"+tailer+",detail:" + detail);
-
                     Apple apple = new Apple(1.3f, "Guangzhou");
                     String desc = appleService.outTest1(apple);
                     Logger.d("now apple:" + apple.toString());
 
-
-
                 }
             }
 
+        });
+
+        findViewById(R.id.onewayTestBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
+                if (appleService != null) {
+                    Logger.d("start of oneWayTest");
+                    appleService.oneWayTest(new Apple(690f, "New York"));
+                    Logger.d("end of oneWayTest");
+                }
+            }
         });
 
         findViewById(R.id.outTest1Btn).setOnClickListener(new View.OnClickListener() {
@@ -52,12 +58,12 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.outTest2Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
-                if(appleService!=null){
-                    int[]intArray=new int[3];
-                    String result=appleService.outTest2(intArray);
-                    for(int i=0;i<intArray.length;++i){
-                        Logger.d("intArray["+i+"]="+intArray[i]);
+                IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
+                if (appleService != null) {
+                    int[] intArray = new int[3];
+                    String result = appleService.outTest2(intArray);
+                    for (int i = 0; i < intArray.length; ++i) {
+                        Logger.d("intArray[" + i + "]=" + intArray[i]);
                     }
                 }
 
@@ -67,11 +73,11 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.outTest3Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
-                if(appleService!=null){
-                    int[]intArray=new int[3];
-                    String[]strArray=new String[5];
-                    appleService.outTest3(intArray,strArray);
+                IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
+                if (appleService != null) {
+                    int[] intArray = new int[3];
+                    String[] strArray = new String[5];
+                    appleService.outTest3(intArray, strArray);
                     printIntArray(intArray);
                     printStringArray(strArray);
                 }
@@ -81,11 +87,11 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.outTest4Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
-                if(appleService!=null){
-                   Apple[]apples=new Apple[6];
-                   appleService.outTest4(apples);
-                   printObjArray(apples,"apples");
+                IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
+                if (appleService != null) {
+                    Apple[] apples = new Apple[6];
+                    appleService.outTest4(apples);
+                    printObjArray(apples, "apples");
                 }
             }
         });
@@ -93,11 +99,11 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.inoutTest1Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
-                if(appleService!=null){
-                    Apple apple=new Apple(1.8f,"Jiangxi");
+                IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
+                if (appleService != null) {
+                    Apple apple = new Apple(1.8f, "Jiangxi");
                     appleService.inoutTest1(apple);
-                    Logger.d("inoutTest1 result:"+apple.toString());
+                    Logger.d("inoutTest1 result:" + apple.toString());
                 }
 
             }
@@ -106,45 +112,44 @@ public class BananaActivity extends AppCompatActivity {
         findViewById(R.id.inoutTest2Btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IAppleService appleService=InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
-                if(appleService!=null){
-                    Apple[]apples=new Apple[3];
-                    for(int i=0;i<apples.length;++i){
-                        apples[i]=new Apple(1.1f+i,"Guangzhou"+i);
+                IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
+                if (appleService != null) {
+                    Apple[] apples = new Apple[3];
+                    for (int i = 0; i < apples.length; ++i) {
+                        apples[i] = new Apple(1.1f + i, "Guangzhou" + i);
                     }
                     appleService.inoutTest2(apples);
                     Logger.d("inoutTest2 result is as follows:");
-                    printObjArray(apples,"apples");
+                    printObjArray(apples, "apples");
                 }
             }
         });
 
     }
 
-    private void printIntArray(int[]array){
-        for(int i=0;i<array.length;++i){
-            Logger.d("intArray["+i+"]="+array[i]);
+    private void printIntArray(int[] array) {
+        for (int i = 0; i < array.length; ++i) {
+            Logger.d("intArray[" + i + "]=" + array[i]);
         }
     }
 
-    private void printStringArray(String[]array){
-        for(int i=0;i<array.length;++i){
-            Logger.d("strArray["+i+"]="+array[i]);
+    private void printStringArray(String[] array) {
+        for (int i = 0; i < array.length; ++i) {
+            Logger.d("strArray[" + i + "]=" + array[i]);
         }
     }
 
-    private void printObjArray(Object[]objs,String name){
-        if(objs==null){
+    private void printObjArray(Object[] objs, String name) {
+        if (objs == null) {
             return;
         }
-        for(int i=0;i<objs.length;++i){
-            if(objs[i]==null){
+        for (int i = 0; i < objs.length; ++i) {
+            if (objs[i] == null) {
                 continue;
             }
-            Logger.d(name+"["+i+"]="+objs[i].toString());
+            Logger.d(name + "[" + i + "]=" + objs[i].toString());
         }
     }
-
 
 
 }

@@ -136,7 +136,6 @@ public class SupportRemoteManagerFragment extends Fragment {
         lifecycle.onStop();
     }
 
-    //TODO 是选择onDestroy()好呢，还是onDestoryView()好呢?
     @Override
     public void onDestroy() {
         super.onDestroy();

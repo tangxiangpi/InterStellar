@@ -52,7 +52,6 @@ public class RemoteManager implements IRemoteManager, LifecycleListener {
         if (null == serviceInterface) {
             return null;
         }
-        //TODO 这里除了获取proxy之外，还要获取对方进程的信息，比如BinderBean,目前其实是可以获取到的，关键就看怎么写了。
         T proxy = RemoteServiceManager.getInstance().getServiceProxy(serviceInterface);
         BinderBean binderBean = RemoteServiceManager.getInstance().getServerBinderBean(serviceInterface.getCanonicalName());
         if (binderBean != null && !TextUtils.isEmpty(binderBean.getProcessName())) {

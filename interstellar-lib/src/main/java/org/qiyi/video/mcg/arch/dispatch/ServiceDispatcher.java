@@ -14,9 +14,6 @@ import java.util.Map;
 
 public class ServiceDispatcher implements IServiceDispatcher {
 
-    //TODO 但是这样的话其实不太好，因为一旦binderDied就要移除所有的引用。而且实际上transferBinder与serviceInterface是一对多的关系
-    //private Map<String,BinderBean>transferBinderCache=new HashMap<>();
-    //key为serviceInterface, value为processName
     private Map<String, String> interfaceCache = new HashMap<>();
 
     private Map<String, BinderBean> transferBinderCache = new HashMap<>();

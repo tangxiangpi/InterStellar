@@ -1,1 +1,1 @@
-include ':app', ':interstellar-lib', ':buildSrc'
+include ':app', ':interstellar-lib', ':buildSrc', ':InterStellar-Plugin'

@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
  * Created by wangallen on 2018/4/17.
  */
 //TODO 考虑一下是否要使用这个
-public class DispatcherService extends Service{
+public class DispatcherService extends Service {
 
     @Nullable
     @Override

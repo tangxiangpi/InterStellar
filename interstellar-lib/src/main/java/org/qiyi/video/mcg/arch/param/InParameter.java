@@ -9,12 +9,10 @@ import android.os.Parcel;
 public class InParameter extends AbstractParameter {
 
     public InParameter(Object param, java.lang.reflect.Type genericParaType) {
-        //super(param,genericParaType);
         this.value = param;
     }
 
     public InParameter(Parcel in) {
-        //value = in.readValue(getClass().getClassLoader());
         this.value = extendReadValue(in, getClass().getClassLoader());
     }
 
