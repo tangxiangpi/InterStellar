@@ -18,7 +18,6 @@ public class AppleService implements IAppleService {
         return appleNum * 5;
     }
 
-
     @Override
     public String getAppleDetails(int appleNum, String manifacture, String tailerName, String userName, int userId) {
         manifacture = "IKEA";
@@ -31,6 +30,21 @@ public class AppleService implements IAppleService {
         }
     }
 
+    @Override
+    public synchronized void oneWayTest(Apple apple) {
+        if(apple==null){
+            Logger.d("Man can not eat null apple!");
+        }else{
+            Logger.d("Start to eat big apple that weighs "+apple.getWeight());
+            try{
+                wait(3000);
+                //Thread.sleep(3000);
+            }catch(InterruptedException ex){
+                ex.printStackTrace();
+            }
+            Logger.d("End of eating apple!");
+        }
+    }
 
     @Override
     public String outTest1(Apple apple) {

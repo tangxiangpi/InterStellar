@@ -28,7 +28,6 @@ public class ActivityFragLifecycle implements Lifecycle {
         } else if (isStarted) {
             listener.onStart();
         } else {
-            //TODO 这个判断好像会有点问题吧?这会导致在刚添加时就调用一次onStop()
             listener.onStop();
         }
     }

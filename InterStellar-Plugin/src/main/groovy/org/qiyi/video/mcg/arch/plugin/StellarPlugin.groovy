@@ -7,7 +7,7 @@ import org.qiyi.video.mcg.arch.plugin.service.IServiceGenerator
 import org.qiyi.video.mcg.arch.plugin.service.StubServiceGenerator
 import org.qiyi.video.mcg.arch.plugin.extension.DispatcherExtension
 
-public class StarBridgePlugin implements Plugin<Project> {
+public class StellarPlugin implements Plugin<Project> {
 
     private IServiceGenerator stubServiceGenerator = new StubServiceGenerator()
 
@@ -21,11 +21,11 @@ public class StarBridgePlugin implements Plugin<Project> {
         stubServiceGenerator.injectStubServiceToManifest(project)
 
         //注册一个Transform
-        def classTransform = new StarBridgeTransform(project,stubServiceGenerator)
+        def classTransform = new StellarTransform(project,stubServiceGenerator)
 
         android.registerTransform(classTransform)
 
-        System.out.println("-------------end of buildSrc StarBridgeTransform-----------------")
+        System.out.println("-------------end of buildSrc StellarTransform-----------------")
     }
 
 }

@@ -15,8 +15,6 @@ import android.util.SparseArray;
 import org.qiyi.video.mcg.arch.exception.StellarException;
 import org.qiyi.video.mcg.arch.log.Logger;
 import org.qiyi.video.mcg.arch.parcelable.Outable;
-import org.qiyi.video.mcg.arch.type.BaseType;
-import org.qiyi.video.mcg.arch.type.Type;
 import org.qiyi.video.mcg.arch.utils.ParcelUtils;
 import org.qiyi.video.mcg.arch.utils.ReflectUtils;
 
@@ -31,7 +29,6 @@ import java.util.Map;
 /**
  * Created by wangallen on 2018/4/3.
  */
-//TODO 更好的一种方式是不是让它实现in和out的所有功能，然后在InParameter和OutParameter中再重写相应的方法
 public abstract class AbstractParameter implements Parcelable, Outable {
 
     // Keep in sync with frameworks/native/include/private/binder/ParcelValTypes.h.
@@ -67,15 +64,10 @@ public abstract class AbstractParameter implements Parcelable, Outable {
     protected static final int VAL_DOUBLEARRAY = 28;
 
     protected int type;
-    protected int baseType;
-    //private int transferType= TransferType.IN;
+
     protected Object value;
 
     public AbstractParameter() {
-    }
-
-    public AbstractParameter(Object param, java.lang.reflect.Type genericParaType) {
-        parseTypeAndBaseType(param.getClass(), genericParaType);
     }
 
     @Override
@@ -86,109 +78,6 @@ public abstract class AbstractParameter implements Parcelable, Outable {
     @Override
     public void readFromParcel(Parcel in) {
         //do nothing
-    }
-
-    //TODO 后面可以考虑扩展到包装类，这样就比AIDL使用上方便更多了
-    private void parseTypeAndBaseType(Class<?> clazz, java.lang.reflect.Type genericParaType) {
-        if (clazz.isPrimitive()) {
-            type = Type.BASE;
-            parsePrimitiveType(clazz);
-            return;
-        }
-        if (clazz == CharSequence.class) {
-            type = Type.BASE;
-            baseType = BaseType.CHARSEQUENCE;
-            return;
-        }
-        if (clazz == String.class) {
-            type = Type.BASE;
-            baseType = BaseType.STRING;
-            return;
-        }
-        if (IBinder.class.isAssignableFrom(clazz)) {
-            type = Type.BASE;
-            baseType = BaseType.IBINDER;
-            return;
-        }
-        if (Bundle.class.isAssignableFrom(clazz)) {
-            type = Type.BASE;
-            baseType = BaseType.BUNDLE;
-            return;
-        }
-        if (Parcelable.class.isAssignableFrom(clazz)) {
-            type = Type.BASE;
-            baseType = BaseType.PARCELABLE;
-            return;
-        }
-        if (clazz.isArray()) {
-            type = Type.ARRAY;
-            parseArrayType(clazz);
-            return;
-        }
-        if (List.class.isAssignableFrom(clazz)) {
-            type = Type.LIST;
-            //TODO 这样做不行，至少要分String,Parcelable,IBinder
-            baseType = BaseType.UNKNOWN;
-            //parseGenericType(genericParaType);
-            return;
-        }
-        if (Map.class.isAssignableFrom(clazz)) {
-            type = Type.MAP;
-            baseType = BaseType.UNKNOWN;
-            return;
-        }
-        throw new StellarException(clazz.getCanonicalName() + " is not supported by InterStellar! Please change type!");
-
-    }
-
-    private void parseArrayType(Class<?> clazz) {
-        if (clazz == int[].class) {
-            baseType = BaseType.INT;
-        } else if (clazz == short[].class) {
-            baseType = BaseType.SHORT;
-        } else if (clazz == long[].class) {
-            baseType = BaseType.LONG;
-        } else if (clazz == float[].class) {
-            baseType = BaseType.FLOAT;
-        } else if (clazz == double[].class) {
-            baseType = BaseType.DOUBLE;
-        } else if (clazz == byte[].class) {
-            baseType = BaseType.BYTE;
-        } else if (clazz == boolean[].class) {
-            baseType = BaseType.BOOLEAN;
-        } else if (clazz == char[].class) {
-            baseType = BaseType.CHAR;
-        } else if (clazz == CharSequence[].class) {
-            baseType = BaseType.CHARSEQUENCE;
-        } else if (clazz == String[].class) {
-            baseType = BaseType.STRING;
-        } else if (Parcelable[].class.isAssignableFrom(clazz)) {
-            baseType = BaseType.PARCELABLE;
-        }
-    }
-
-    private void parsePrimitiveType(Class<?> clazz) {
-        if (clazz == int.class) {
-            baseType = BaseType.INT;
-        } else if (clazz == short.class) {
-            baseType = BaseType.SHORT;
-        } else if (clazz == long.class) {
-            baseType = BaseType.LONG;
-        } else if (clazz == float.class) {
-            baseType = BaseType.FLOAT;
-        } else if (clazz == double.class) {
-            baseType = BaseType.DOUBLE;
-        } else if (clazz == byte.class) {
-            baseType = BaseType.BYTE;
-        } else if (clazz == boolean.class) {
-            baseType = BaseType.BOOLEAN;
-        } else if (clazz == char.class) {
-            baseType = BaseType.CHAR;
-        }
-    }
-
-    private final void writeParcelableCreator(Parcel dest, Parcelable p) {
-        dest.writeString(p.getClass().getName());
     }
 
     //TODO 这个是否为NULL其实不应该影响类型的写入的!所以是不是应该再处理一下呢?
@@ -207,9 +96,7 @@ public abstract class AbstractParameter implements Parcelable, Outable {
             dest.writeInt(VAL_PERSISTABLEBUNDLE);
         } else if (val instanceof Parcelable) {
             dest.writeInt(VAL_PARCELABLE);
-            //TODO 先简单粗暴一点，就直接写入值好了
             dest.writeParcelable((Parcelable) val, flags);
-            //writeParcelableCreator(dest, (Parcelable) val);
         } else if (val instanceof Short) {
             dest.writeInt(VAL_SHORT);
         } else if (val instanceof Long) {
@@ -244,10 +131,6 @@ public abstract class AbstractParameter implements Parcelable, Outable {
             dest.writeInt(VAL_PARCELABLEARRAY);
             dest.writeInt(((Parcelable[]) val).length);
             dest.writeString(((Parcelable[]) val).getClass().getComponentType().getName());
-
-            //dest.writeParcelableArray((Parcelable[]) val, flags);
-            //dest.writeInt(((Parcelable[]) val).length);
-            //writeParcelableCreator(dest, ((Parcelable[]) val)[0]);
         } else if (val instanceof int[]) {
             dest.writeInt(VAL_INTARRAY);
             dest.writeInt(((int[]) val).length);
@@ -281,9 +164,6 @@ public abstract class AbstractParameter implements Parcelable, Outable {
         }
 
     }
-
-
-    //TODO 要确认一件事，就是如果Parcel里面有值但是没有去读取，会不会对后面造成影响
 
     /**
      * 之所以叫readType()而不是readValue(),是因为这里实际上并不读取值，而只是读取类型
@@ -446,12 +326,6 @@ public abstract class AbstractParameter implements Parcelable, Outable {
             Class clazz = Class.forName(componentType);
             //KP 用Array.newInstance()创建的数组，数组中各元素为null;
             return Array.newInstance(clazz, length);
-            /*
-            for(int i=0;i<length;++i){
-                array[i]=in.readParcelable(clazz.getClassLoader());
-            }
-            return array;
-            */
         } catch (ClassNotFoundException ex) {
             ex.printStackTrace();
         }
@@ -485,12 +359,6 @@ public abstract class AbstractParameter implements Parcelable, Outable {
             }
         };
     }
-
-    /*
-    private <T extends Parcelable> T extendReadParcelable(ClassLoader loader,Parcel in){
-        Parcelable.Creator<?>creator=in.readPar
-    }
-    */
 
     protected final Object extendReadValue(Parcel source, ClassLoader loader) {
         int type = source.readInt();
@@ -697,8 +565,6 @@ public abstract class AbstractParameter implements Parcelable, Outable {
         } else if (v instanceof CharSequence) {
             // Must be after String
             dest.writeInt(VAL_CHARSEQUENCE);
-            //TODO 这是个隐藏方法，要用反射来做!
-            //dest.writeCharSequence((CharSequence) v);
             writeCharSequence(dest, (CharSequence) v);
         } else if (v instanceof List) {
             dest.writeInt(VAL_LIST);
@@ -935,7 +801,6 @@ public abstract class AbstractParameter implements Parcelable, Outable {
             //TODO
             writeCharSequenceArray(dest, (CharSequence[]) value);
         } else if (value instanceof Parcelable[]) {
-            //TODO 这样能行吗?
             dest.writeInt(VAL_PARCELABLEARRAY);
             writeParcelableArray2Parcel(dest, flags);
         } else if (value instanceof int[]) {

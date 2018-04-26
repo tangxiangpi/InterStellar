@@ -6,8 +6,6 @@ package org.qiyi.video.mcg.arch.life;
 
 public class ApplicationLifecycle implements Lifecycle{
 
-    //TODO 其实完善一点的话，Application也有onStop()和onDestroy()的时候吧，比如这个进程被kill掉了
-
     @Override
     public void addListener(LifecycleListener listener) {
         listener.onStart();

@@ -9,7 +9,6 @@ import org.qiyi.video.mcg.arch.log.Logger;
 /**
  * Created by wangallen on 2018/3/31.
  */
-//TODO 后面考虑持久化保存，然后把Dispatcher放在一个独立进程中，这样万一这个进程挂了，重新拉起还是可以恢复数据
 public class Dispatcher extends IServiceRegister.Stub {
 
     public static Dispatcher sInstance;

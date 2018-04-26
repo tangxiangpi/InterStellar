@@ -61,7 +61,6 @@ public class RemoteManagerFragment extends Fragment {
     private void registerFragmentWithRoot(Activity activity) {
         Logger.d(this.toString() + "-->registerFragmentWithRoot()");
         unregisterFragmentWithRoot();
-        //TODO 这里是不是要先判断一下rootRemoteManagerFragment是否为空呢?
         rootRemoteManagerFragment = InterStellar.getRetriever().getRemoteManagerFragment(activity);
         if (!equals(rootRemoteManagerFragment)) {
             rootRemoteManagerFragment.addChildRemoteManagerFragment(this);
@@ -110,7 +109,6 @@ public class RemoteManagerFragment extends Fragment {
         lifecycle.onStop();
     }
 
-    //TODO 可能要放在onDestoryView()中会更好，因为在ViewPager中管理的Fragment,会先调用onDestoryView(),但是可能一直都不会调用onDestory()
     @Override
     public void onDestroy() {
         super.onDestroy();

@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: org.qiyi.video.mcg.arch.plugin.StarBridgePlugin
+apply plugin: org.qiyi.video.mcg.arch.plugin.StellarPlugin
 
 
 android {

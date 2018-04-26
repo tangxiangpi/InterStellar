@@ -52,9 +52,7 @@ public class RemoteServiceManager {
     public synchronized void registerRemoteService(Class<?> serviceInterface, Object serviceImpl) {
         Logger.d("RemoteServiceManager-->registerRemoteService");
         serviceCache.put(serviceInterface.getCanonicalName(), serviceImpl);
-        //TODO 向Dispatcher注册接口和进程信息
         checkServiceRegister();
-        //TODO 要采用其他策略来获取了
         if (null == serviceRegister) {
             return;
         }
@@ -103,14 +101,12 @@ public class RemoteServiceManager {
         return serviceCache.get(serviceInterface.getCanonicalName());
     }
 
-    //TODO 这个改成叫getStubService()会更不容易引起歧义
     public synchronized Object getStubService(String serviceCanonicalName) {
         return serviceCache.get(serviceCanonicalName);
     }
 
     private Map<String, BinderBean> remoteTransferCache = new HashMap<>();
 
-    //TODO cache的结果要改一下，要将BinderBean进行缓存
     public synchronized ITransfer getRemoteTransfer(final String serviceCanonicalName) {
         BinderBean bean = getServerBinderBean(serviceCanonicalName);
         if (bean == null) {
@@ -147,7 +143,6 @@ public class RemoteServiceManager {
 
     public synchronized void unregisterRemoteService(Class<?> serviceInterface) {
         serviceCache.remove(serviceInterface.getCanonicalName());
-        //TODO 向Dispatcher注销，或者就发一个广播事件好了
         try {
             serviceRegister.unregisterRemoteService(serviceInterface.getCanonicalName());
         } catch (RemoteException ex) {

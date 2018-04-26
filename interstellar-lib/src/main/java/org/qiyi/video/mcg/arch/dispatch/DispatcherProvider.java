@@ -11,7 +11,7 @@ import org.qiyi.video.mcg.arch.log.Logger;
  * Created by wangallen on 2018/4/7.
  */
 
-public class DispatcherProvider extends ContentProvider{
+public class DispatcherProvider extends ContentProvider {
 
     public static final String PROJECTION_MAIN[] = {"main"};
 
