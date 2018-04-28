@@ -32,14 +32,14 @@ InterSteallar和其他组件间通信方案的对比如下:
 
 
 # 接入方式
-首先在buildscript中添加classpath(以0.9.5为例):
+首先在buildscript中添加classpath:
 ```groovy
-    classpath "org.qiyi.video.mcg.arch:plugin:0.9.5"
+    classpath "org.qiyi.video.mcg.arch:plugin:$version"
 ```
 这两个分别是核心代码库和gradle插件库的路径。
 在Application或library Module中使用核心库:
 ```groovy
-    implementation 'org.qiyi.video.mcg.arch:core:0.9.5'
+    implementation "org.qiyi.video.mcg.arch:core:$version"
 ```
 在application Module中使用gradle插件:
 ```groovy

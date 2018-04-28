@@ -7,8 +7,8 @@ buildscript {
             'userName':'mcg-arch',
             'groupId':'org.qiyi.video.svg',
             'passWord':'xxxxxx',
-            'version_code':95,
-            'version_name':'0.9.5'
+            'version_code':96,
+            'version_name':'0.9.6'
     ]
 
     repositories {
@@ -17,6 +17,8 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
+
+        classpath "org.qiyi.video.mcg.arch:plugin:0.9.6"
 
         classpath 'com.novoda:bintray-release:0.8.1'
         // NOTE: Do not place your application dependencies here; they belong
