@@ -25,13 +25,13 @@ public class StubServiceMatchInjector {
 
     private IServiceGenerator serviceGenerator
 
-    private Map<String,String>matchedServices
+    private Map<String, String> matchedServices
     private boolean found = false
 
-    public StubServiceMatchInjector(ClassPool classPool, IServiceGenerator serviceGenerator, String rootDirPath) {
+    StubServiceMatchInjector(ClassPool classPool, IServiceGenerator serviceGenerator, String rootDirPath) {
         this.classPool = classPool
-        this.serviceGenerator=serviceGenerator
-        this.rootDirPath=rootDirPath
+        this.serviceGenerator = serviceGenerator
+        this.rootDirPath = rootDirPath
     }
 
     private void readMatchedServices(String dirPath, String fileName) {
@@ -50,7 +50,7 @@ public class StubServiceMatchInjector {
         while ((content = reader.readLine()) != null) {
             String[] matchKeyValues = content.split(",")
             if (matchKeyValues != null) {
-                println "read key:"+matchKeyValues[0]+",value:"+matchKeyValues[1]
+                println "read key:" + matchKeyValues[0] + ",value:" + matchKeyValues[1]
                 matchedServices.put(matchKeyValues[0], matchKeyValues[1])
             }
         }
@@ -58,13 +58,13 @@ public class StubServiceMatchInjector {
         ism.close()
     }
 
-    public void injectMatchCode(JarInput jarInput) {
+    void injectMatchCode(JarInput jarInput) {
         if (found) {
             return
         }
 
         String filePath = jarInput.file.getAbsolutePath()
-
+        //TODO 不能直接用"/"而是要用File.seperator
         if (filePath.endsWith(".jar") && !filePath.contains("com.android.support")
                 && !filePath.contains("/com/android/support")) {
 
@@ -75,8 +75,6 @@ public class StubServiceMatchInjector {
                 JarEntry jarEntry = (JarEntry) enumeration.nextElement()
                 String entryName = jarEntry.getName()
 
-                //println "jarEntryName:"+entryName
-
                 if (entryName.endsWith(STUB_SERVICE_MATCHER_CLASS)) {
                     prepareInjectMatchCode(filePath)
                     found = true
@@ -86,11 +84,10 @@ public class StubServiceMatchInjector {
 
         }
     }
-
+    //TODO 这里其实有优化的空间，就是可以直接从内存进行zipJar操作，而不必先写入到文件，然后又从文件读出进行zipJar操作
     private void prepareInjectMatchCode(String filePath) {
 
-        //filePath是类似../ServiceManager/StarBridge-Lib/build/intermediates/intermediate-jars/debug/classes.jar这样的路径
-        println "StubServiceMatchInjector-->prepareInjectMatchCode,filePath:" + filePath
+        println "prepareInjectMatchCode"
 
         File jarFile = new File(filePath)
         String jarDir = jarFile.getParent() + File.separator + jarFile.getName().replace('.jar', '')
@@ -102,7 +99,8 @@ public class StubServiceMatchInjector {
         jarFile.delete()
 
         //注入代码
-        classPool.insertClassPath(jarDir)
+        //classPool.insertClassPath(jarDir)
+        classPool.appendClassPath(jarDir)
 
         for (String className : classNameList) {
             if (className.endsWith(STUB_SERVICE_MATCHER_CLASS)) {
@@ -119,16 +117,19 @@ public class StubServiceMatchInjector {
 
     }
 
-    private void fetchServiceInfo(){
-        matchedServices=serviceGenerator.getMatchServices()
+    private void fetchServiceInfo() {
+        matchedServices = serviceGenerator.getMatchServices()
         if (matchedServices == null) {
-            this.matchedServices=new HashMap<>()
+            this.matchedServices = new HashMap<>()
             readMatchedServices(rootDirPath + File.separator + StubServiceGenerator.MATCH_DIR, StubServiceGenerator.MATCH_FILE_NAME)
         }
     }
 
     //这个className含有.class,而实际上要获取CtClass的话只需要前面那部分，即"org.qiyi.video.svg.utils.StubServiceMatcher"而不是"org.qiyi.video.svg.utils.StubServiceMatcher.class"
     private void doInjectMatchCode(String path) {
+
+        println "doInjectMatchCode"
+
         //首先获取服务信息
         fetchServiceInfo()
 

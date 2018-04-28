@@ -13,7 +13,9 @@ public class JarUtils{
      * @param destDirPath jar包解压后的保存路径
      * @return 返回该jar包中包含的所有class的完整类名类名集合，其中一条数据如：com.aitski.hotpatch.Xxxx.class
      */
-    public static List<String> unzipJar(String jarPath, String destDirPath) {
+    static List<String> unzipJar(String jarPath, String destDirPath) {
+
+        println "unzipJar,jarPath:"+jarPath
 
         List<String> list = new ArrayList()
         if (jarPath.endsWith('.jar')) {
@@ -25,12 +27,20 @@ public class JarUtils{
                 if (jarEntry.directory) {
                     continue
                 }
+                if (jarEntry.isDirectory()) {
+                    continue
+                }
                 String entryName = jarEntry.getName()
                 if (entryName.endsWith('.class')) {
                     String className = entryName.replace('\\', '.').replace('/', '.')
                     list.add(className)
+                } else {
+                    continue
                 }
-                String outFileName = destDirPath + "/" + entryName
+
+                String outFileName = destDirPath + File.separator + entryName
+                //println "outFileName:"+outFileName
+
                 File outFile = new File(outFileName)
                 outFile.getParentFile().mkdirs()
                 InputStream inputStream = jarFile.getInputStream(jarEntry)
@@ -49,14 +59,27 @@ public class JarUtils{
      * @param packagePath 将这个目录下的所有文件打包成jar
      * @param destPath 打包好的jar包的绝对路径
      */
-    public static void zipJar(String packagePath, String destPath) {
+    static void zipJar(String packagePath, String destPath) {
+
+        println "zipJar,packagePath:"+packagePath+",destPath:"+destPath
 
         File file = new File(packagePath)
         JarOutputStream outputStream = new JarOutputStream(new FileOutputStream(destPath))
         file.eachFileRecurse { File f ->
+
+            //println "f.getAbsolutePath():"+f.getAbsolutePath()
+
             String entryName = f.getAbsolutePath().substring(packagePath.length() + 1)
+            //println "before replace,entryName:"+entryName
+
+            entryName=entryName.replaceAll("\\\\","/")
+
+            //println "after replace,entryName:"+entryName
+
+            //println "entryName:"+entryName
+
             outputStream.putNextEntry(new ZipEntry(entryName))
-            if(!f.directory) {
+            if (!f.directory) {
                 InputStream inputStream = new FileInputStream(f)
                 outputStream << inputStream
                 inputStream.close()
@@ -64,5 +87,6 @@ public class JarUtils{
         }
         outputStream.close()
     }
+
 
 }

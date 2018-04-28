@@ -29,33 +29,31 @@ public class StubServiceGenerator implements IServiceGenerator {
     private Map<String, String> matchedServices
 
     private String rootDirPath
-    //private String dispatcherProcess
     def dispatcher
+    private String pkgName
 
     @Override
-    public void injectStubServiceToManifest(Project project) {
+    void injectStubServiceToManifest(Project project) {
 
         println "injectStubServiceToManifest"
 
-        //this.dispatcherProcess=dispatcherProcess
-
-        println "rootDir:" + project.rootDir.absolutePath
         rootDirPath = project.rootDir.absolutePath
 
-        //TODO 要找到别的办法来获取Manifest文件
         def android = project.extensions.getByType(AppExtension)
-        this.dispatcher=project.extensions.getByType(DispatcherExtension)
+
+        this.dispatcher = project.extensions.getByType(DispatcherExtension)
 
         project.afterEvaluate {
             android.applicationVariants.all { variant ->
+
+                if (pkgName == null) {
+                    pkgName = getPackageName(variant)
+                    println "pkgName:" + pkgName
+                }
+
                 variant.outputs.each { output ->
 
-                    //injectManifestFile(output.processManifest.manifestOutputDirectory)
-
                     output.processManifest.doLast {
-                        //TODO 注意:Instant run时processManifest有可能不执行,另外，要保证各种buildVariants下都能运行
-
-                        println "processManifest-->doLast"
 
                         println "manifestOutputDirectory:" + output.processManifest.manifestOutputDirectory.absolutePath
 
@@ -81,23 +79,15 @@ public class StubServiceGenerator implements IServiceGenerator {
         }
     }
 
-    //TODO 这样的话会不会每次都往其中加入相应的CommuStubService?
     private void injectManifestFile(File manifestFile) {
 
         println "injectManifestFile"
 
-        //def manifestFile = new File(manifestDir, "AndroidManifest.xml")
-
         //检测文件是否存在
         if (manifestFile != null && manifestFile.exists()) {
 
-            println "manifest: ${manifestFile}"
-
             String serviceManifest = addServiceItem(manifestFile.absolutePath)
 
-            println "serviceManifest:$serviceManifest"
-
-            //writeStubService2File("./app/build/",MATCH_FILE_NAME)
             writeStubService2File(rootDirPath + File.separator + MATCH_DIR, MATCH_FILE_NAME)
 
             String newManifestContent = manifestFile.getText("UTF-8")
@@ -110,6 +100,12 @@ public class StubServiceGenerator implements IServiceGenerator {
         }
     }
 
+    def getPackageName(variant) {
+        if (null == variant) {
+            return null
+        }
+        [variant.mergedFlavor.applicationId, variant.buildType.applicationIdSuffix].findAll().join()
+    }
 
     @Override
     Map<String, String> getMatchServices() {
@@ -136,8 +132,8 @@ public class StubServiceGenerator implements IServiceGenerator {
                         "${PROCESS}": it
                 )
 
-                if(matchedServices==null){
-                    matchedServices=new HashMap<>()
+                if (matchedServices == null) {
+                    matchedServices = new HashMap<>()
                 }
                 matchedServices.put(it, serviceName)
 
@@ -145,34 +141,34 @@ public class StubServiceGenerator implements IServiceGenerator {
             }
 
             //之后，写入DispatcherService和DispatcherProvider
-            def dispatcherProcess=dispatcher.process
-            println "dispatcher.process:"+dispatcher.process
-            if(dispatcherProcess!=null&&dispatcherProcess.length()>0){
-                service("${NAME}":DISPATCHER_SERVICE,
-                        "${ENABLED}":"${TRUE}",
-                        "${EXPORTED}":"${FALSE}",
-                        "${PROCESS}":dispatcherProcess
+            def dispatcherProcess = dispatcher.process
+            println "dispatcher.process:" + dispatcher.process
+            if (dispatcherProcess != null && dispatcherProcess.length() > 0) {
+                service("${NAME}": DISPATCHER_SERVICE,
+                        "${ENABLED}": "${TRUE}",
+                        "${EXPORTED}": "${FALSE}",
+                        "${PROCESS}": dispatcherProcess
                 )
 
                 provider(
-                        "${AUTHORITIES}":DISPATCHER_AUTHORITY,
-                        "${EXPORTED}":"${FALSE}",
-                        "${NAME}":DISPTACHER_PROVIDER,
-                        "${ENABLED}":"${TRUE}",
-                        "${PROCESS}":dispatcherProcess
+                        "${AUTHORITIES}": getAuthority(),
+                        "${EXPORTED}": "${FALSE}",
+                        "${NAME}": DISPTACHER_PROVIDER,
+                        "${ENABLED}": "${TRUE}",
+                        "${PROCESS}": dispatcherProcess
                 )
 
-            }else{
-                service("${NAME}":DISPATCHER_SERVICE,
-                        "${ENABLED}":"${TRUE}",
-                        "${EXPORTED}":"${FALSE}"
+            } else {
+                service("${NAME}": DISPATCHER_SERVICE,
+                        "${ENABLED}": "${TRUE}",
+                        "${EXPORTED}": "${FALSE}"
                 )
 
                 provider(
-                        "${AUTHORITIES}":DISPATCHER_AUTHORITY,
-                        "${EXPORTED}":"${FALSE}",
-                        "${NAME}":DISPTACHER_PROVIDER,
-                        "${ENABLED}":"${TRUE}"
+                        "${AUTHORITIES}": getAuthority(),
+                        "${EXPORTED}": "${FALSE}",
+                        "${NAME}": DISPTACHER_PROVIDER,
+                        "${ENABLED}": "${TRUE}"
                 )
 
             }
@@ -184,6 +180,10 @@ public class StubServiceGenerator implements IServiceGenerator {
         def normalStr = writer.toString().replace("<application>", "").replace("</application>", "")
 
         return normalStr
+    }
+
+    private String getAuthority() {
+        return pkgName + "." + DISPATCHER_AUTHORITY
     }
 
     private void writeStubService2File(String dirPath, String fileName) {

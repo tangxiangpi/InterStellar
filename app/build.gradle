@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
-apply plugin: org.qiyi.video.mcg.arch.plugin.StellarPlugin
-
+//apply plugin: org.qiyi.video.mcg.arch.plugin.StellarPlugin
+apply plugin: 'org.qiyi.video.mcg.arch.plugin'
 
 android {
     compileSdkVersion 26
@@ -29,7 +29,8 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
-    implementation project(':interstellar-lib')
+    //implementation project(':interstellar-lib')
+    implementation 'org.qiyi.video.mcg.arch:core:0.9.6'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
