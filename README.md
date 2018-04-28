@@ -32,15 +32,14 @@ InterSteallar和其他组件间通信方案的对比如下:
 
 
 # 接入方式
-首先在buildscript中添加classpath(以1.0.0为例):
+首先在buildscript中添加classpath(以0.9.5为例):
 ```groovy
-    classpath "org.qiyi.video.mcg.arch:core:1.0.0"
-    classpath "org.qiyi.video.mcg.arch:plugin:1.0.0"
+    classpath "org.qiyi.video.mcg.arch:plugin:0.9.5"
 ```
 这两个分别是核心代码库和gradle插件库的路径。
 在Application或library Module中使用核心库:
 ```groovy
-    implementation 'org.qiyi.video.mcg.arch:core:1.0.0'
+    implementation 'org.qiyi.video.mcg.arch:core:0.9.5'
 ```
 在application Module中使用gradle插件:
 ```groovy
@@ -102,62 +101,147 @@ InterSteallar和其他组件间通信方案的对比如下:
 ## 远程服务的注册与使用
 远程服务的注册与使用略微麻烦一点，因为需要像实现AIDL Service那样定义aidl接口。
 ### 远程接口的定义与实现
-定义aidl接口，并且要将编译生成的Stub和Proxy类暴露给所有模块, 类似的，也是放在common module中，以暴露给其他模块使用。比如定义一个购买苹果的服务接口:
-```aidl
-    import org.qiyi.video.svg.IPCCallback;
-    
-    interface IBuyApple {
-        int buyAppleInShop(int userId);
-        void buyAppleOnNet(int userId,IPCCallback callback);
-    }
-```
-而接口的实现如下:
+依靠@in,@out,@inout,@oneway这4个注解定义可进行IPC通信的接口，这四个注解分别对应于aidl中的in,out,inout和oneway修饰符。
+函数参数不添加注解的话，默认为@in.
+如下是一个典型的接口定义:
 ```java
-public class BuyAppleImpl extends IBuyApple.Stub {
+   public interface IAppleService {
 
-    private static BuyAppleImpl instance;
+       int getApple(int money);
 
-    public static BuyAppleImpl getInstance() {
-        if (null == instance) {
-            synchronized (BuyAppleImpl.class) {
-                if (null == instance) {
-                    instance = new BuyAppleImpl();
-                }
-            }
+       float getAppleCalories(int appleNum);
+
+       String getAppleDetails(int appleNum,  String manifacture,  String tailerName, String userName,  int userId);
+
+       @oneway
+       void oneWayTest(Apple apple);
+
+       String outTest1(@out Apple apple);
+
+       String outTest2(@out int[] appleNum);
+
+       String outTest3(@out int[] array1, @out String[] array2);
+
+       String outTest4(@out Apple[] apples);
+
+       String inoutTest1(@inout Apple apple);
+
+       String inoutTest2(@inout Apple[] apples);
+
+   }
+```
+
+
+而接口的实现跟普通接口基本一样，除了要为@out和@inout的参数赋值之外:
+```java
+public class AppleService implements IAppleService {
+
+    @Override
+    public int getApple(int money) {
+        return money / 2;
+    }
+
+    @Override
+    public float getAppleCalories(int appleNum) {
+        return appleNum * 5;
+    }
+
+    @Override
+    public String getAppleDetails(int appleNum, String manifacture, String tailerName, String userName, int userId) {
+        manifacture = "IKEA";
+        tailerName = "muji";
+        userId = 1024;
+        if ("Tom".equals(userName)) {
+            return manifacture + "-->" + tailerName;
+        } else {
+            return tailerName + "-->" + manifacture;
         }
-        return instance;
-    }
-
-    private BuyAppleImpl() {
     }
 
     @Override
-    public int buyAppleInShop(int userId) throws RemoteException {
-       ...
+    public synchronized void oneWayTest(Apple apple) {
+        if(apple==null){
+            Logger.d("Man can not eat null apple!");
+        }else{
+            Logger.d("Start to eat big apple that weighs "+apple.getWeight());
+            try{
+                wait(3000);
+                //Thread.sleep(3000);
+            }catch(InterruptedException ex){
+                ex.printStackTrace();
+            }
+            Logger.d("End of eating apple!");
+        }
     }
 
     @Override
-    public void buyAppleOnNet(int userId, IPCCallback callback) throws RemoteException {
-       ...
+    public String outTest1(Apple apple) {
+        if (apple == null) {
+            apple = new Apple(3.2f, "Shanghai");
+        }
+        apple.setWeight(apple.getWeight() * 2);
+        apple.setFrom("Beijing");
+        return "Have a nice day!";
+    }
+
+    @Override
+    public String outTest2(int[] appleNum) {
+        if (null == appleNum) {
+            return "";
+        }
+        for (int i = 0; i < appleNum.length; ++i) {
+            appleNum[i] = i + 1;
+        }
+        return "Have a nice day 02!";
+    }
+
+    @Override
+    public String outTest3(int[] array1, String[] array2) {
+        for (int i = 0; i < array1.length; ++i) {
+            array1[i] = i + 2;
+        }
+        for (int i = 0; i < array2.length; ++i) {
+            array2[i] = "Hello world" + (i + 1);
+        }
+
+        return "outTest3";
+    }
+
+    @Override
+    public String outTest4(Apple[] apples) {
+        for (int i = 0; i < apples.length; ++i) {
+            apples[i] = new Apple(i + 2f, "Shanghai");
+        }
+
+        return "outTest4";
+    }
+
+    @Override
+    public String inoutTest1(Apple apple) {
+        Logger.d("AppleService-->inoutTest1,apple:" + apple.toString());
+        apple.setWeight(3.14159f);
+        apple.setFrom("Germany");
+        return "inoutTest1";
+    }
+
+    @Override
+    public String inoutTest2(Apple[] apples) {
+        Logger.d("AppleService-->inoutTest2,apples[0]:" + apples[0].toString());
+        for (int i = 0; i < apples.length; ++i) {
+            apples[i].setWeight(i * 1.5f);
+            apples[i].setFrom("Germany" + i);
+        }
+        return "inoutTest2";
     }
 }
 
 ```
 
+
 ### 远程服务的注册
 与本地接口的注册略有不同，远程接口注册的是继承了Stub类的IBinder部分，注册方式有传递接口Class和接口全路径名两种，如下:
 ```java
-    InterStellar.registerRemoteService(IBuyApple.class, BuyAppleImpl.getInstance().asBinder());
-```
-其中BuyAppleImpl是继承了IBuyApple.Stub类的具体实现类,另外，其实这里写成下面这样其实也可以:
-```java
-    InterStellar.registerRemoteService(IBuyApple.class, BuyAppleImpl.getInstance());
-```
-因为BuyAppleImpl继承的IBuyApple.Stub类继承自android.os.Binder,实现了asBinder()接口;
-
-传递全路径名的注册方式如下:
-```java
-    InterStellar.registerRemoteService(IBuyApple.class.getCanonicalName(),BuyAppleImpl.getInstance().asBinder());
+    InterStellar.registerRemoteService(IAppleService.class,new AppleService());
 ```
 
 ### 远程服务的使用
@@ -166,97 +250,23 @@ public class BuyAppleImpl extends IBuyApple.Stub {
 
 以FragmentActivity中使用为例,如下的this是指FragmentActivity:
 ```java
-        IBinder binder = InterStellar.with(this).getRemoteService(IBuyApple.class);
-        if (binder == null) {
-            return;
-        }
-        IBuyApple buyApple = IBuyApple.Stub.asInterface(binder);
-        if (buyApple == null) {
-            return;
-        }
-        try {
-            buyApple.buyAppleInShop(29);
-        } catch (RemoteException ex) {
-            ex.printStackTrace();
+        IAppleService appleService = InterStellar.with(BananaActivity.this).getRemoteService(IAppleService.class);
+        if (appleService != null) {
+            int appleNum = appleService.getApple(120);
+            Logger.d("appleNum:" + appleNum);
+            float calories = appleService.getAppleCalories(30);
+            Logger.d("calories:" + calories);
+
+            Apple apple = new Apple(1.3f, "Guangzhou");
+            String desc = appleService.outTest1(apple);
+            Logger.d("now apple:" + apple.toString());
+
         }
 ```
 其他的在android.app.Fragment,android.support.v4.app.Fragment，以及普通的Activity中远程服务的使用类似，可查看app module中的CustomFragment,CustomSupportFragment,FragActivity等，不再赘述。
 
 值得注意的是，**远程服务其实既可在其他进程中调用，也可以在同进程中被调用，当在同一进程时，虽然调用方式一样，但其实会自动降级为进程内普通的接口调用，这个binder会自动处理.**
 
-### 远程服务的Callback问题
-考虑到远程服务也可能有耗时操作，所以需要支持远程调用的Callback功能。
-对于有耗时操作的远程服务，定义接口时需要借助lib中的IPCCallback,如下:
-```aidl
-    interface IBuyApple {
-        int buyAppleInShop(int userId);
-        void buyAppleOnNet(int userId,IPCCallback callback);
-    }
-```
-其中的buyAppleOnNet()方法就是耗时操作，所以需要在定义时加上IPCCallback,注意这里不能是自己随便定义的Callback接口，否则aidl编译通不过。
-其中的IPCCallback本身也是一个aidl接口，如下:
-```aidl
-    interface IPCCallback {
-       void onSuccess(in Bundle result);
-       void onFail(String reason);
-    }
-```
-对于IPCCallback的调用，固然也可以用由调用者直接继承IPCCallback.Stub类，实现相关接口，如:
-```java
-        IBinder buyAppleBinder = InterStellar.getRemoteService(IBuyApple.class);
-        if (null == buyAppleBinder) {
-            return;
-        }
-        IBuyApple buyApple = IBuyApple.Stub.asInterface(buyAppleBinder);
-        if (null != buyApple) {
-            try {
-                buyApple.buyAppleOnNet(10, new IPCCallback.Stub() {
-                    @Override
-                    public void onSuccess(Bundle result) throws RemoteException {
-                       ...
-                    }
-
-                    @Override
-                    public void onFail(String reason) throws RemoteException {
-                       ...
-                    }
-                });
-
-            } catch (RemoteException ex) {
-                ex.printStackTrace();
-            }
-        }
-    
-```
-但是考虑到回调是在Binder线程中，而绝大部分情况下调用者希望回调在主线程，所以lib封装了一个BaseCallback给接入方使用，如下:
-```java
-   IBinder buyAppleBinder = InterStellar.getRemoteService(IBuyApple.class);
-        if (null == buyAppleBinder) {
-            return;
-        }
-        IBuyApple buyApple = IBuyApple.Stub.asInterface(buyAppleBinder);
-        if (null != buyApple) {
-            try {
-                buyApple.buyAppleOnNet(10, new BaseCallback() {
-                    @Override
-                    public void onSucceed(Bundle result) {
-                       ...
-                    }
-
-                    @Override
-                    public void onFailed(String reason) {
-                        ...
-                    }
-                });
-
-            } catch (RemoteException ex) {
-                ex.printStackTrace();
-            }
-        }
-```
-**第二种方式也是我们推荐的使用方式!**
-
-详情可察看applemodule中的BananaActivity.
 
 ### 生命周期自动管理的问题
 对于IPC,为了提高对方进程的优先极，在使用InterStellar.with().getRemoteService()时会进行bindService()操作。
@@ -271,40 +281,14 @@ public class BuyAppleImpl extends IBuyApple.Stub {
 ```
   如果只获取了一个远程服务，那么就使用前一个unbind()方法;否则使用后一个。
 
-## 事件订阅与发布
-### 事件
-InterStellar中Event的定义如下:
-```java
-    public class Event implements Parcelable {
-    
-        private String name;
-    
-        private Bundle data;
-        
-        ...
-    }
-```
-即 事件=名称+数据，通信时将需要传递的数据存放在Bundle中。  
-其中**名称要求在整个项目中唯一**，否则可能出错。
-由于要跨进程传输，所以所有数据只能放在Bundle中进行包装。
 
-### 事件订阅
-事件订阅很简单，首先需要有一个实现了EventListener接口的对象。
-然后就可以订阅自己感兴趣的事件了，如下:
-```java
-    InterStellar.subscribe(EventConstants.APPLE_EVENT,MainActivity.this);
-```
-其中MainActivity实现了EventListener接口，此处表示订阅了名称为EventConstnts.APPLE_EVENT的事件。
-
-### 事件发布
-事件发布很简单，调用publish方法即可，如下:
-```java
-    Bundle bundle = new Bundle();
-    bundle.putString("Result", "gave u five apples!");
-    InterStellar.publish(new Event(EventConstants.APPLE_EVENT, bundle));
-```
 # License
 BSD-3-Clause. See the [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause) file for details.
+
+# TODO List
++ 远程服务的Callback
++ 事件总线
+
 
 # 支持
 1. Sample代码

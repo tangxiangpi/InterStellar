@@ -31,7 +31,7 @@ public class Dispatcher extends IServiceRegister.Stub {
     }
 
     @Override
-    public void registerRemoteService(String serviceInterface, BinderBean transferBinderBean) throws RemoteException {
+    public synchronized void registerRemoteService(String serviceInterface, BinderBean transferBinderBean) throws RemoteException {
         if (TextUtils.isEmpty(serviceInterface) || null == transferBinderBean) {
             return;
         }
@@ -40,7 +40,7 @@ public class Dispatcher extends IServiceRegister.Stub {
     }
 
     @Override
-    public void unregisterRemoteService(String serviceInterface) throws RemoteException {
+    public synchronized void unregisterRemoteService(String serviceInterface) throws RemoteException {
         if (TextUtils.isEmpty(serviceInterface)) {
             return;
         }
@@ -49,7 +49,7 @@ public class Dispatcher extends IServiceRegister.Stub {
     }
 
     @Override
-    public BinderBean getTransferInfo(String serviceInterface) throws RemoteException {
+    public synchronized BinderBean getTransferInfo(String serviceInterface) throws RemoteException {
         Logger.d("Dispatcher-->getTransferInfo,serviceInterface:" + serviceInterface);
         if (TextUtils.isEmpty(serviceInterface)) {
             return null;

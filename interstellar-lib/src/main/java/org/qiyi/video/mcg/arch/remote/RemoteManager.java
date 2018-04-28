@@ -48,7 +48,7 @@ public class RemoteManager implements IRemoteManager, LifecycleListener {
     }
 
     @Override
-    public <T> T getRemoteService(Class<?> serviceInterface) {
+    public synchronized <T> T getRemoteService(Class<?> serviceInterface) {
         if (null == serviceInterface) {
             return null;
         }
