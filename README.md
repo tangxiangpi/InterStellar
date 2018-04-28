@@ -1,7 +1,7 @@
 # InterStellar
 ![InterStellar_license](https://img.shields.io/badge/license-BSD--3--Clause-brightgreen.svg)
-![InterStellar_core_tag](https://img.shields.io/badge/InterStellar%20core-0.9.5-brightgreen.svg)
-![InterStellar_plugin_tag](https://img.shields.io/badge/InterStellar%20plugin-0.9.5-brightgreen.svg)
+![InterStellar_core_tag](https://img.shields.io/badge/InterStellar%20core-0.9.6-brightgreen.svg)
+![InterStellar_plugin_tag](https://img.shields.io/badge/InterStellar%20plugin-0.9.6-brightgreen.svg)
 
 InterStellar是一个基于接口的组件间通信方案，包括同进程的本地接口调用和跨进程接口调用。
 在InterStellar的世界里，不需要任何aidl接口及Service，IPC通信就和本地通信一样简单、方便。
